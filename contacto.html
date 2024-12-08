@@ -7,6 +7,10 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <link rel="stylesheet" href="estilos.css">
   <link rel="icon" href="imagenes/olimpologo.png" type="image/x-icon">
+  <script type="text/javascript"
+  src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+</script>
+
   </head>
   <body>
 
@@ -66,7 +70,6 @@
     </form>
   </div>
 
-  
   <div id="mensaje-enviado" class="container mt-3 mb-3 p-3 text-center" style="background-image: url('imagenes/papel.jpg'); display: none;">
     <h2 class="mb-3">Mensaje enviado con éxito!</h2>
     <img src="https://media1.tenor.com/m/FLmHVvKPmUQAAAAC/hermes-blood-of-zeus-hermes.gif" alt="Mensaje enviado con éxito" class="img-fluid mb-3" style="width: 400px; height: 200px;">
@@ -75,44 +78,73 @@
   </div>
   
   
-  
   <script>
+    // Inicializa EmailJS con tu usuario ID
+    emailjs.init("S0hr0J8-MsgheeTuw");
+  
     const form = document.getElementById('form-contacto');
     const mensajeEnviado = document.getElementById('mensaje-enviado');
     const emailInput = document.getElementById('email');
+    const mensajeInput = document.getElementById('mensaje');
     const errorEmail = document.getElementById('error-email');
     const formulario = document.getElementById('formulario');
-    
-
+  
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const email = emailInput.value.trim();
+      const mensaje = mensajeInput.value.trim();
+      
       if (!email || !validateEmail(email)) {
         errorEmail.textContent = 'Por favor, ingresa un correo electrónico válido';
         return;
       }
-   // Enviar el formulario aquí
-   console.log('Formulario enviado');
-    mensajeEnviado.style.display = 'block';
-
+  
+      // Parámetros para enviar el correo al usuario
+      const templateParamsUsuario = {
+        user_email: email,
+        message: mensaje
+      };
+  
+      // Parámetros para enviar el correo al administrador
+      const templateParamsAdministrador = {
+        admin_email: "stefanialudovico28@gmail.com", // Aquí pon tu correo de administrador
+        user_email: email,
+        message: mensaje
+      };
+  
+      // Enviar correo al usuario
+      emailjs.send("service_ydh15jq", "template_s03aur9", templateParamsUsuario)
+        .then((response) => {
+          console.log("Correo enviado al usuario", response);
+        }, (error) => {
+          console.log("Error al enviar correo al usuario", error);
+        });
+  
+      // Enviar correo al administrador
+      emailjs.send("service_ydh15jq", "template_j68obdw", templateParamsAdministrador)
+        .then((response) => {
+          console.log("Correo enviado al administrador", response);
+        }, (error) => {
+          console.log("Error al enviar correo al administrador", error);
+        });
+  
+      // Mostrar mensaje de éxito
+      mensajeEnviado.style.display = 'block';
     });
-
+  
     function validateEmail(email) {
       const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return re.test(email);
     }
+  
     const enviarOtraConsulta = document.getElementById('enviar-otra-consulta');
-
-enviarOtraConsulta.addEventListener('click', () => {
-  formulario.style.display = 'block';
-  mensajeEnviado.style.display = 'none';
-  emailInput.value = '';
-  mensaje.value = '';
-});
-
-
+    enviarOtraConsulta.addEventListener('click', () => {
+      formulario.style.display = 'block';
+      mensajeEnviado.style.display = 'none';
+      emailInput.value = '';
+      mensajeInput.value = '';
+    });
   </script>
-
     
 
 
