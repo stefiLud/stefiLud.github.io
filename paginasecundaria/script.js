@@ -1,131 +1,150 @@
-let vidaLlama = 100; // Establece la vida inicial de la llama en 100.
-let tiempo = 0; // Inicializa el tiempo en 0.
-let intervalo; // Variable para almacenar el intervalo de tiempo del juego.
-let intervaloEsfera; // Variable para almacenar el intervalo de creación de esferas.
-let juegoPausado = false; // Variable que indica si el juego está pausado o no.
+// Inicialización de variables principales
+let vidaLlama = 100; // Vida inicial de la llama
+let tiempo = 0; // Contador de tiempo en segundos
+let intervalo; // Intervalo para controlar el tiempo del juego
+let intervaloEsfera; // Intervalo para la aparición de las esferas
+let juegoPausado = false; // Estado del juego (pausado o no)
 
-// Array de objetos que contienen las imágenes y los valores de vida asociados a cada esfera.
+// Lista de imágenes con sus valores de vida asociados
 const imagenes = [
-    { src: "imagenes/cocinar.png", vida: 10 },
-    { src: "imagenes/ayudar.png", vida: 10 },
-    { src: "imagenes/amigos.png", vida: 10 },
-    { src: "imagenes/familia.png", vida: 10 }
+    { src: "imagenes/cocinar.png", vida: 10 }, // Imagen asociada a +10 de vida
+    { src: "imagenes/ayudar.png", vida: 10 }, // Imagen asociada a +10 de vida
+    { src: "imagenes/amigos.png", vida: 10 }, // Imagen asociada a +10 de vida
+    { src: "imagenes/familia.png", vida: 10 } // Imagen asociada a +10 de vida
 ];
 
-// Función que crea una esfera y la agrega a la pantalla.
+// Función para crear una nueva esfera en la pantalla
 function crearEsfera() {
-    const esfera = document.createElement("div"); // Crea un nuevo div para la esfera.
-    esfera.className = "esfera"; // Le asigna la clase 'esfera' al div.
-    const imagen = imagenes[Math.floor(Math.random() * imagenes.length)]; // Elige aleatoriamente una imagen de las disponibles.
-    esfera.innerHTML = `<img src="${imagen.src}" alt="Imagen esfera" style="width: 80px; height: 80px;">`; // Inserta la imagen en el div.
-    esfera.style.left = `${Math.random() * (window.innerWidth - 50)}px`; // Posiciona la esfera de manera aleatoria en el eje X.
-    document.body.appendChild(esfera); // Añade la esfera al cuerpo del documento.
+    // Crear un nuevo elemento div para la esfera
+    const esfera = document.createElement("div");
+    esfera.className = "esfera"; // Clase para el estilo CSS
 
-    let esferaEliminada = false; // Bandera para saber si la esfera ha sido eliminada.
-    // Establece un temporizador para eliminar la esfera después de 3 segundos si no ha sido eliminada antes.
+    // Seleccionar una imagen aleatoria de la lista
+    const imagen = imagenes[Math.floor(Math.random() * imagenes.length)];
+    esfera.innerHTML = `<img src="${imagen.src}" alt="Imagen esfera" style="width: 80px; height: 80px;">`;
+
+    // Posicionar la esfera aleatoriamente en el ancho de la pantalla
+    esfera.style.left = `${Math.random() * (window.innerWidth - 50)}px`;
+
+    // Agregar la esfera al cuerpo del documento
+    document.body.appendChild(esfera);
+
+    // Variable para rastrear si la esfera ha sido eliminada
+    let esferaEliminada = false;
+
+    // Temporizador para eliminar la esfera después de 3 segundos si no se hace clic en ella
     const tiempoEliminacion = setTimeout(() => {
         if (!esferaEliminada && !juegoPausado) {
-            esfera.remove(); // Elimina la esfera si no ha sido eliminada antes.
-            vidaLlama -= 10; // Resta 10 a la vida de la llama si la esfera no se hace clic.
-            actualizarVidaLlama(); // Actualiza la barra de vida.
+            esfera.remove(); // Eliminar la esfera del DOM
+            vidaLlama -= 10; // Reducir la vida de la llama
+            actualizarVidaLlama(); // Actualizar la barra y el tamaño del fuego
         }
     }, 3000);
 
-    // Añade un evento que elimina la esfera cuando se hace clic sobre ella.
+    // Evento de clic en la esfera
     esfera.addEventListener("click", () => {
-        clearTimeout(tiempoEliminacion); // Cancela el temporizador de eliminación.
-        esferaEliminada = true; // Marca la esfera como eliminada.
-        esfera.remove(); // Elimina la esfera.
-        vidaLlama += imagen.vida; // Aumenta la vida de la llama con el valor asociado a la imagen de la esfera.
-        actualizarVidaLlama(); // Actualiza la barra de vida.
+        clearTimeout(tiempoEliminacion); // Cancelar el temporizador de eliminación
+        esferaEliminada = true; // Marcar la esfera como eliminada
+        esfera.remove(); // Eliminar la esfera del DOM
+        vidaLlama += imagen.vida; // Aumentar la vida de la llama según la imagen seleccionada
+        actualizarVidaLlama(); // Actualizar la barra y el tamaño del fuego
     });
 }
 
-// Función que actualiza la vida de la llama y la barra de progreso.
+// Función para actualizar la barra de vida y el tamaño del fuego
 function actualizarVidaLlama() {
-    vidaLlama -= 3; // Reduce la vida de la llama en 3 cada segundo.
-    const barraVida = document.querySelector(".progress-bar"); // Selecciona la barra de vida.
-    barraVida.style.width = `${vidaLlama}%`; // Actualiza el ancho de la barra según la vida restante.
+    // Reducir la vida de la llama progresivamente
+    vidaLlama -= 3;
 
-    // Si la vida de la llama llega a 0 o menos, el juego termina.
+    // Actualizar el ancho de la barra de vida en función del porcentaje actual de vida
+    const barraVida = document.querySelector(".progress-bar");
+    barraVida.style.width = `${vidaLlama}%`;
+
+    // Actualizar el tamaño del fuego en función de la vida restante
+    const fuego = document.querySelector(".fuego");
+    if (fuego) {
+        fuego.style.transform = `scale(${Math.max(vidaLlama / 100, 0.1)})`; // Escalar proporcionalmente
+    }
+
+    // Verificar si la vida ha llegado a 0
     if (vidaLlama <= 0) {
-        clearInterval(intervalo); // Detiene el intervalo del tiempo.
-        clearInterval(intervaloEsfera); // Detiene el intervalo de esferas.
-        detenerJuego("Perdiste!", "imagenes/perdiste2.gif"); // Llama a la función para detener el juego mostrando el mensaje de pérdida.
+        clearInterval(intervalo); // Detener el intervalo de tiempo
+        clearInterval(intervaloEsfera); // Detener la creación de esferas
+        detenerJuego("Perdiste!", "imagenes/perdiste2.gif"); // Mostrar mensaje de derrota
     }
 }
 
-// Función que inicia el juego.
+// Función para iniciar el juego
 function iniciarJuego() {
-    document.getElementById("iniciar").disabled = true; // Deshabilita el botón de inicio después de hacer clic.
-    // Inicia un intervalo para incrementar el tiempo cada segundo.
+    document.getElementById("iniciar").disabled = true; // Desactivar el botón de inicio
+
+    // Intervalo para actualizar el tiempo y la vida cada segundo
     intervalo = setInterval(() => {
         if (tiempo > 60 && vidaLlama > 0) {
-            clearInterval(intervalo); // Detiene el intervalo de tiempo.
-            clearInterval(intervaloEsfera); // Detiene el intervalo de esferas.
-            detenerJuego("Ganaste!", "imagenes/ganaste2.gif"); // Llama a la función para detener el juego mostrando el mensaje de victoria.
+            // Si pasa más de 60 segundos y hay vida, se gana el juego
+            clearInterval(intervalo);
+            clearInterval(intervaloEsfera);
+            detenerJuego("Ganaste!", "imagenes/ganaste2.gif"); // Mostrar mensaje de victoria
         } else if (!juegoPausado) {
-            tiempo++; // Aumenta el tiempo en 1 cada segundo.
-            actualizarVidaLlama(); // Actualiza la vida de la llama.
+            tiempo++; // Incrementar el tiempo
+            actualizarVidaLlama(); // Actualizar la vida y el fuego
         }
     }, 1000);
 
-    // Inicia un intervalo para crear esferas cada cierto tiempo aleatorio.
+    // Intervalo para crear esferas en intervalos aleatorios
     intervaloEsfera = setInterval(() => {
         if (!juegoPausado) {
-            crearEsfera(); // Llama a la función para crear una esfera.
+            crearEsfera(); // Crear una nueva esfera
         }
-    }, Math.random() * 2000 + 1000); // Establece un intervalo aleatorio entre 1 y 3 segundos para crear una esfera.
+    }, Math.random() * 2000 + 1000);
 }
 
-// Función que detiene el juego, muestra el mensaje y el gif correspondiente.
+// Función para detener el juego y mostrar el mensaje final
 function detenerJuego(mensaje, gif) {
-    clearInterval(intervalo); // Detiene el intervalo de tiempo.
-    clearInterval(intervaloEsfera); // Detiene el intervalo de esferas.
+    clearInterval(intervalo); // Detener el intervalo de tiempo
+    clearInterval(intervaloEsfera); // Detener la creación de esferas
 
-    // Crea un contenedor para mostrar el mensaje y el gif.
+    // Crear un contenedor para mostrar el mensaje final
     const container = document.createElement("div");
     container.className = "container mt-1 mb-2";
-    container.style.backgroundImage = "url('imagenes/papel.jpg')"; // Establece el fondo del contenedor.
-    container.style.height = "100vh"; // Establece la altura al 100% de la ventana.
-    container.style.display = "flex"; // Utiliza flexbox para centrar el contenido.
-    container.style.justifyContent = "center"; // Centra el contenido horizontalmente.
-    container.style.alignItems = "center"; // Centra el contenido verticalmente.
+    container.style.backgroundImage = "url('imagenes/papel.jpg')";
+    container.style.height = "100vh";
+    container.style.display = "flex";
+    container.style.justifyContent = "center";
+    container.style.alignItems = "center";
+
+    // Contenido del mensaje final
     container.innerHTML = `
         <div class="row">
             <div class="col-md-12 p-3 mb-8 text-center">
-                <img src="${gif}" alt="${mensaje}" style="width: 400px; height: 200px;"> <!-- Muestra el gif del mensaje -->
-                <h1>${mensaje}</h1> <!-- Muestra el mensaje -->
-                <button id="reiniciar-juego" class="btn btn-primary">Reiniciar el juego</button> <!-- Botón para reiniciar el juego -->
+                <img src="${gif}" alt="${mensaje}" style="width: 400px; height: 200px;">
+                <h1>${mensaje}</h1>
+                <button id="reiniciar-juego" class="btn btn-primary">Reiniciar el juego</button>
             </div>
         </div>
     `;
-    document.body.innerHTML = ""; // Limpia el contenido del body.
-    document.body.appendChild(container); // Añade el contenedor con el mensaje y gif al body.
+    document.body.innerHTML = ""; // Limpiar el contenido del cuerpo
+    document.body.appendChild(container); // Agregar el contenedor final
 
-    // Añade un evento para reiniciar el juego cuando se hace clic en el botón.
+    // Evento para reiniciar el juego
     document.getElementById("reiniciar-juego").addEventListener("click", () => {
-        location.reload(); // Recarga la página para reiniciar el juego.
+        location.reload(); // Recargar la página
     });
 }
 
-// Función para pausar y reanudar el juego.
+// Función para pausar o reanudar el juego
 function pausarReanudarJuego() {
-    juegoPausado = !juegoPausado; // Cambia el estado del juego (pausar o reanudar).
-    const textoBoton = juegoPausado ? "Reanudar" : "Pausar"; // Cambia el texto del botón según el estado.
-    document.getElementById("pausar").textContent = textoBoton; // Actualiza el texto del botón de pausar/reanudar.
+    juegoPausado = !juegoPausado; // Cambiar el estado de pausa
+    const textoBoton = juegoPausado ? "Reanudar" : "Pausar"; // Actualizar el texto del botón
+    document.getElementById("pausar").textContent = textoBoton;
 
-    // Pausa o reanuda las animaciones de las esferas según el estado del juego.
+    // Pausar o reanudar las animaciones de las esferas
     const esferas = document.querySelectorAll(".esfera");
     esferas.forEach((esfera) => {
-        if (juegoPausado) {
-            esfera.style.animationPlayState = "paused"; // Pausa la animación de la esfera.
-        } else {
-            esfera.style.animationPlayState = "running"; // Reanuda la animación de la esfera.
-        }
+        esfera.style.animationPlayState = juegoPausado ? "paused" : "running";
     });
 }
 
-// Eventos para iniciar el juego y pausar/reanudar el juego al hacer clic en los botones.
-document.getElementById("iniciar").addEventListener("click", iniciarJuego);
-document.getElementById("pausar").addEventListener("click", pausarReanudarJuego);
+// Asignar eventos a los botones
+document.getElementById("iniciar").addEventListener("click", iniciarJuego); // Botón de inicio
+document.getElementById("pausar").addEventListener("click", pausarReanudarJuego); // Botón de pausar/reanudar
